@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shell Particleboard Property Predictor</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%); min-height: 100vh; color: #e0e0e0; padding: 20px; }
+        .container { max-width: 1100px; margin: 0 auto; }
+        h1 { text-align: center; font-size: 2rem; margin-bottom: 10px; color: #e94560; }
+        .subtitle { text-align: center; font-size: 0.95rem; color: #a0a0b0; margin-bottom: 30px; }
+        .models-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 24px; margin-bottom: 30px; }
+        .model-card { background: rgba(255,255,255,0.06); border-radius: 16px; padding: 28px; border: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(10px); transition: transform 0.2s, box-shadow 0.2s; }
+        .model-card:hover { transform: translateY(-4px); box-shadow: 0 12px 40px rgba(0,0,0,0.3); }
+        .model-card h2 { font-size: 1.2rem; margin-bottom: 6px; }
+        .model-card .equation { font-family: 'Courier New', monospace; font-size: 0.82rem; background: rgba(0,0,0,0.3); padding: 8px 12px; border-radius: 8px; margin-bottom: 18px; color: #7dd3fc; }
+        .card-ts h2 { color: #ef4444; }
+        .card-mor h2 { color: #f59e0b; }
+        .card-ib h2 { color: #8b5cf6; }
+        label { display: block; font-size: 0.85rem; margin-bottom: 4px; color: #b0b0c0; }
+        input[type=number] { width: 100%; padding: 10px 14px; border: 1px solid rgba(255,255,255,0.15); border-radius: 8px; background: rgba(0,0,0,0.25); color: #fff; font-size: 1rem; margin-bottom: 14px; outline: none; transition: border-color 0.2s; }
+        input[type=number]:focus { border-color: #e94560; }
+        .btn { width: 100%; padding: 12px; border: none; border-radius: 10px; font-size: 1rem; font-weight: 600; cursor: pointer; transition: opacity 0.2s; color: #fff; }
+        .btn-ts { background: linear-gradient(135deg, #ef4444, #b91c1c); }
+        .btn-mor { background: linear-gradient(135deg, #f59e0b, #b45309); }
+        .btn-ib { background: linear-gradient(135deg, #8b5cf6, #6d28d9); }
+        .btn:hover { opacity: 0.85; }
+        .result { margin-top: 16px; padding: 14px; border-radius: 10px; text-align: center; font-size: 1.3rem; font-weight: 700; min-height: 52px; display: flex; align-items: center; justify-content: center; }
+        .result-ts { background: rgba(239,68,68,0.12); color: #fca5a5; }
+        .result-mor { background: rgba(245,158,11,0.12); color: #fcd34d; }
+        .result-ib { background: rgba(139,92,246,0.12); color: #c4b5fd; }
+        .info { text-align: center; font-size: 0.8rem; color: #6b7280; margin-top: 20px; }
+        .info a { color: #7dd3fc; }
+        .range-hint { font-size: 0.75rem; color: #888; margin-bottom: 14px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Shell Particleboard Property Predictor</h1>
+        <p class="subtitle">Random Forest Linear Equations &mdash; Predict TS, MOR, and IB from input properties</p>
+        <div class="models-grid">
+            <!-- TS Card -->
+            <div class="model-card card-ts">
+                <h2>Thickness Swelling (TS)</h2>
+                <div class="equation">TS = 0.0027 &times; Density + 0.2743 &times; WA &minus; 2.3678</div>
+                <label for="ts-density">Density (kg/m&sup3;)</label>
+                <input type="number" id="ts-density" placeholder="e.g. 900" step="any">
+                <label for="ts-wa">Water Absorption (%)</label>
+                <input type="number" id="ts-wa" placeholder="e.g. 50" step="any">
+                <div class="range-hint">Typical ranges: Density 518&ndash;1585 kg/m&sup3;, WA 5&ndash;90%</div>
+                <button class="btn btn-ts" onclick="calcTS()">Predict TS</button>
+                <div class="result result-ts" id="ts-result">&mdash;</div>
+            </div>
+            <!-- MOR Card -->
+            <div class="model-card card-mor">
+                <h2>Modulus of Rupture (MOR)</h2>
+                <div class="equation">MOR = 0.0055 &times; Density + 0.0021 &times; MOE + 1.4443</div>
+                <label for="mor-density">Density (kg/m&sup3;)</label>
+                <input type="number" id="mor-density" placeholder="e.g. 900" step="any">
+                <label for="mor-moe">Modulus of Elasticity (MPa)</label>
+                <input type="number" id="mor-moe" placeholder="e.g. 2000" step="any">
+                <div class="range-hint">Typical ranges: Density 518&ndash;1585 kg/m&sup3;, MOE 11&ndash;4190 MPa</div>
+                <button class="btn btn-mor" onclick="calcMOR()">Predict MOR</button>
+                <div class="result result-mor" id="mor-result">&mdash;</div>
+            </div>
+            <!-- IB Card -->
+            <div class="model-card card-ib">
+                <h2>Internal Bond Strength (IB)</h2>
+                <div class="equation">IB = 0.0054 &times; Density + 0.0007 &times; MOE &minus; 4.0890</div>
+                <label for="ib-density">Density (kg/m&sup3;)</label>
+                <input type="number" id="ib-density" placeholder="e.g. 900" step="any">
+                <label for="ib-moe">Modulus of Elasticity (MPa)</label>
+                <input type="number" id="ib-moe" placeholder="e.g. 2000" step="any">
+                <div class="range-hint">Typical ranges: Density 518&ndash;1585 kg/m&sup3;, MOE 11&ndash;4190 MPa</div>
+                <button class="btn btn-ib" onclick="calcIB()">Predict IB</button>
+                <div class="result result-ib" id="ib-result">&mdash;</div>
+            </div>
+        </div>
+        <p class="info">Based on Mirindi et al. &mdash; Random Forest linear models for shell-based particleboard properties.<br>Reference: <a href="https://github.com/Derrickmirindi/shell-particleboard-predictor" target="_blank">GitHub Repository</a></p>
+    </div>
+    <script>
+        function calcTS() {
+            const d = parseFloat(document.getElementById('ts-density').value);
+            const wa = parseFloat(document.getElementById('ts-wa').value);
+            const el = document.getElementById('ts-result');
+            if (isNaN(d) || isNaN(wa)) { el.textContent = 'Please enter both values'; return; }
+            const ts = 0.0027 * d + 0.2743 * wa - 2.3678;
+            el.textContent = 'TS = ' + ts.toFixed(2) + ' %';
+        }
+        function calcMOR() {
+            const d = parseFloat(document.getElementById('mor-density').value);
+            const moe = parseFloat(document.getElementById('mor-moe').value);
+            const el = document.getElementById('mor-result');
+            if (isNaN(d) || isNaN(moe)) { el.textContent = 'Please enter both values'; return; }
+            const mor = 0.0055 * d + 0.0021 * moe + 1.4443;
+            el.textContent = 'MOR = ' + mor.toFixed(2) + ' MPa';
+        }
+        function calcIB() {
+            const d = parseFloat(document.getElementById('ib-density').value);
+            const moe = parseFloat(document.getElementById('ib-moe').value);
+            const el = document.getElementById('ib-result');
+            if (isNaN(d) || isNaN(moe)) { el.textContent = 'Please enter both values'; return; }
+            const ib = 0.0054 * d + 0.0007 * moe - 4.0890;
+            el.textContent = 'IB = ' + ib.toFixed(4) + ' MPa';
+        }
+    </script>
+</body>
+</html>
