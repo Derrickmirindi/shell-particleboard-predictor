@@ -6,33 +6,33 @@
     <title>Shell Particleboard Property Predictor</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%); min-height: 100vh; color: #e0e0e0; padding: 20px; }
+        body { font-family: 'Times New Roman', Times, serif; background: linear-gradient(135deg, #d6eaf8 0%, #aed6f1 50%, #85c1e9 100%); min-height: 100vh; color: #1a1a2e; padding: 20px; }
         .container { max-width: 1100px; margin: 0 auto; }
-        h1 { text-align: center; font-size: 2rem; margin-bottom: 10px; color: #e94560; }
-        .subtitle { text-align: center; font-size: 0.95rem; color: #a0a0b0; margin-bottom: 30px; }
+        h1 { text-align: center; font-size: 2rem; margin-bottom: 10px; color: #1a5276; }
+        .subtitle { text-align: center; font-size: 0.95rem; color: #2c3e50; margin-bottom: 30px; }
         .models-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 24px; margin-bottom: 30px; }
-        .model-card { background: rgba(255,255,255,0.06); border-radius: 16px; padding: 28px; border: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(10px); transition: transform 0.2s, box-shadow 0.2s; }
-        .model-card:hover { transform: translateY(-4px); box-shadow: 0 12px 40px rgba(0,0,0,0.3); }
+        .model-card { background: rgba(255,255,255,0.7); border-radius: 16px; padding: 28px; border: 1px solid rgba(0,0,0,0.1); backdrop-filter: blur(10px); transition: transform 0.2s, box-shadow 0.2s; }
+        .model-card:hover { transform: translateY(-4px); box-shadow: 0 12px 40px rgba(0,0,0,0.15); }
         .model-card h2 { font-size: 1.2rem; margin-bottom: 6px; }
-        .model-card .equation { font-family: 'Courier New', monospace; font-size: 0.82rem; background: rgba(0,0,0,0.3); padding: 8px 12px; border-radius: 8px; margin-bottom: 18px; color: #7dd3fc; }
-        .card-ts h2 { color: #ef4444; }
-        .card-mor h2 { color: #f59e0b; }
-        .card-ib h2 { color: #8b5cf6; }
-        label { display: block; font-size: 0.85rem; margin-bottom: 4px; color: #b0b0c0; }
-        input[type=number] { width: 100%; padding: 10px 14px; border: 1px solid rgba(255,255,255,0.15); border-radius: 8px; background: rgba(0,0,0,0.25); color: #fff; font-size: 1rem; margin-bottom: 14px; outline: none; transition: border-color 0.2s; }
-        input[type=number]:focus { border-color: #e94560; }
-        .btn { width: 100%; padding: 12px; border: none; border-radius: 10px; font-size: 1rem; font-weight: 600; cursor: pointer; transition: opacity 0.2s; color: #fff; }
-        .btn-ts { background: linear-gradient(135deg, #ef4444, #b91c1c); }
-        .btn-mor { background: linear-gradient(135deg, #f59e0b, #b45309); }
-        .btn-ib { background: linear-gradient(135deg, #8b5cf6, #6d28d9); }
+        .model-card .equation { font-family: 'Courier New', monospace; font-size: 0.82rem; background: rgba(0,0,0,0.06); padding: 8px 12px; border-radius: 8px; margin-bottom: 18px; color: #1a5276; }
+        .card-ts h2 { color: #c0392b; }
+        .card-mor h2 { color: #d68910; }
+        .card-ib h2 { color: #6c3483; }
+        label { display: block; font-size: 0.85rem; margin-bottom: 4px; color: #2c3e50; }
+        input[type=number] { width: 100%; padding: 10px 14px; border: 1px solid rgba(0,0,0,0.15); border-radius: 8px; background: rgba(255,255,255,0.8); color: #1a1a2e; font-family: 'Times New Roman', Times, serif; font-size: 1rem; margin-bottom: 14px; outline: none; transition: border-color 0.2s; }
+        input[type=number]:focus { border-color: #2980b9; }
+        .btn { width: 100%; padding: 12px; border: none; border-radius: 10px; font-family: 'Times New Roman', Times, serif; font-size: 1rem; font-weight: 600; cursor: pointer; transition: opacity 0.2s; color: #fff; }
+        .btn-ts { background: linear-gradient(135deg, #e74c3c, #c0392b); }
+        .btn-mor { background: linear-gradient(135deg, #f39c12, #d68910); }
+        .btn-ib { background: linear-gradient(135deg, #8e44ad, #6c3483); }
         .btn:hover { opacity: 0.85; }
         .result { margin-top: 16px; padding: 14px; border-radius: 10px; text-align: center; font-size: 1.3rem; font-weight: 700; min-height: 52px; display: flex; align-items: center; justify-content: center; }
-        .result-ts { background: rgba(239,68,68,0.12); color: #fca5a5; }
-        .result-mor { background: rgba(245,158,11,0.12); color: #fcd34d; }
-        .result-ib { background: rgba(139,92,246,0.12); color: #c4b5fd; }
-        .info { text-align: center; font-size: 0.85rem; color: #9ca3af; margin-top: 30px; line-height: 1.7; }
-        .info strong { color: #e0e0e0; }
-        .range-hint { font-size: 0.75rem; color: #888; margin-bottom: 14px; }
+        .result-ts { background: rgba(231,76,60,0.1); color: #c0392b; }
+        .result-mor { background: rgba(243,156,18,0.1); color: #d68910; }
+        .result-ib { background: rgba(142,68,173,0.1); color: #6c3483; }
+        .info { text-align: center; font-size: 0.85rem; color: #2c3e50; margin-top: 30px; line-height: 1.7; }
+        .info strong { color: #1a1a2e; }
+        .range-hint { font-size: 0.75rem; color: #5d6d7e; margin-bottom: 14px; }
     </style>
 </head>
 <body>
