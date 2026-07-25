@@ -4,233 +4,109 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Shell Particleboard Property Predictor</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <style>
 :root {
 --cols: 12;
 --gutter: 24px;
---margin: 24px;
+--margin: 48px;
 --bl: 8px;
 --lh: 24px;
---maxw: 1440px;
+--maxw: 1296px;
+--paper: #ffffff;
+--ink: #111315;
+--ink-soft: #5b6066;
+--line: #e2e4e7;
+--accent: #0057b8;
+--accent-2: #009688;
+--accent-3: #e8710a;
+--accent-4: #7b2ff7;
+--g-col: rgba(0,87,184,.06);
+--g-edge: rgba(0,87,184,.38);
+--g-base: rgba(0,150,140,.30);
+--g-base-min: rgba(0,150,140,.10);
 }
 * { margin: 0; padding: 0; box-sizing: border-box; }
-body { font-family: 'Times New Roman', Times, serif; background: linear-gradient(135deg, #d6eaf8 0%, #aed6f1 50%, #85c1e9 100%); min-height: 100vh; color: #1a1a2e; padding: var(--margin); line-height: var(--lh); }
-.container { max-width: var(--maxw); margin: 0 auto; padding: 0 var(--margin); }
-.grid { display: grid; grid-template-columns: repeat(var(--cols), 1fr); gap: var(--gutter); align-items: start; }
-header { grid-column: 1 / -1; padding: 32px 0 24px; }
-h1 { text-align: left; font-size: 2rem; line-height: 40px; margin-bottom: 8px; color: #1a5276; }
-.subtitle { text-align: left; font-size: 0.95rem; line-height: var(--lh); color: #2c3e50; margin-bottom: 0; }
-.main-layout { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(var(--cols), 1fr); gap: var(--gutter); align-items: start; }
-.models-col { grid-column: 1 / 6; display: grid; gap: var(--gutter); }
+html, body { background: var(--paper); color: var(--ink); }
+body { font-family: 'Inter', system-ui, -apple-system, sans-serif; font-size: 16px; line-height: var(--lh); -webkit-font-smoothing: antialiased; }
+.wrap { position: relative; max-width: var(--maxw); margin: 0 auto; padding: 48px var(--margin) 96px; }
+.grid { position: relative; display: grid; grid-template-columns: repeat(var(--cols), 1fr); column-gap: var(--gutter); row-gap: var(--lh); align-items: start; }
+.band { grid-column: 1 / -1; display: grid; grid-template-columns: subgrid; column-gap: var(--gutter); align-items: start; }
+@supports not (grid-template-columns: subgrid) { .band { grid-template-columns: repeat(var(--cols), 1fr); } }
+/* header */
+header.masthead-band { grid-column: 1 / -1; text-align: center; border-bottom: 2px solid var(--ink); padding-bottom: 24px; margin-bottom: 8px; }
+.kicker { font-family: 'Space Mono', monospace; font-size: 12px; letter-spacing: .18em; text-transform: uppercase; color: var(--accent); margin-bottom: 16px; }
+.masthead { font-weight: 800; font-size: clamp(2rem, 5vw, 4rem); line-height: 1.02; letter-spacing: -0.02em; color: var(--ink); }
+.subtitle { font-size: 1.05rem; line-height: var(--lh); color: var(--ink-soft); margin-top: 16px; font-weight: 400; }
+/* layout */
+.models-col { grid-column: 1 / 6; display: grid; gap: 24px; }
 .table-col { grid-column: 6 / -1; }
-.model-card { background: rgba(255,255,255,0.7); border-radius: 16px; padding: 24px; border: 1px solid rgba(0,0,0,0.1); backdrop-filter: blur(10px); transition: transform 0.2s, box-shadow 0.2s; }
-.model-card:hover { transform: translateY(-4px); box-shadow: 0 12px 40px rgba(0,0,0,0.15); }
-.model-card h2 { font-size: 1.2rem; line-height: var(--lh); margin-bottom: 8px; }
-.model-card .equation { font-family: 'Courier New', monospace; font-size: 0.82rem; line-height: var(--lh); background: rgba(0,0,0,0.06); padding: 8px 12px; border-radius: 8px; margin-bottom: 16px; color: #1a5276; }
-.card-ts h2 { color: #c0392b; }
-.card-mor h2 { color: #d68910; }
-.card-ib h2 { color: #6c3483; }
-label { display: block; font-size: 0.85rem; line-height: var(--lh); margin-bottom: 4px; color: #2c3e50; }
-input[type=number] { width: 100%; padding: 8px 14px; border: 1px solid rgba(0,0,0,0.15); border-radius: 8px; background: rgba(255,255,255,0.8); color: #1a1a2e; font-family: 'Times New Roman', Times, serif; font-size: 1rem; margin-bottom: 16px; outline: none; transition: border-color 0.2s; }
-input[type=number]:focus { border-color: #2980b9; }
-.btn { width: 100%; padding: 12px; border: none; border-radius: 10px; font-family: 'Times New Roman', Times, serif; font-size: 1rem; font-weight: 600; cursor: pointer; transition: opacity 0.2s; color: #fff; }
-.btn-ts { background: linear-gradient(135deg, #e74c3c, #c0392b); }
-.btn-mor { background: linear-gradient(135deg, #f39c12, #d68910); }
-.btn-ib { background: linear-gradient(135deg, #8e44ad, #6c3483); }
+/* model cards */
+.model-card { background: var(--paper); border: 1px solid var(--line); border-top: 3px solid var(--ink); padding: 24px; transition: border-color .2s; }
+.model-card .num { font-family: 'Space Mono', monospace; font-size: 12px; letter-spacing: .12em; color: var(--ink-soft); text-transform: uppercase; margin-bottom: 8px; }
+.model-card h2 { font-size: 1.25rem; line-height: var(--lh); font-weight: 700; margin-bottom: 8px; letter-spacing: -0.01em; }
+.model-card .equation { font-family: 'Space Mono', monospace; font-size: 0.8rem; line-height: var(--lh); background: #f4f5f6; padding: 8px 12px; margin-bottom: 16px; color: var(--ink); border-left: 3px solid var(--accent); }
+.card-ts { border-top-color: var(--accent); } .card-ts h2 { color: var(--accent); } .card-ts .equation { border-left-color: var(--accent); }
+.card-mor { border-top-color: var(--accent-3); } .card-mor h2 { color: var(--accent-3); } .card-mor .equation { border-left-color: var(--accent-3); }
+.card-ib { border-top-color: var(--accent-4); } .card-ib h2 { color: var(--accent-4); } .card-ib .equation { border-left-color: var(--accent-4); }
+label { display: block; font-size: 0.8rem; line-height: var(--lh); margin-bottom: 4px; color: var(--ink-soft); font-family: 'Space Mono', monospace; text-transform: uppercase; letter-spacing: .06em; }
+input[type=number] { width: 100%; padding: 8px 12px; border: 1px solid var(--line); background: var(--paper); color: var(--ink); font-family: 'Inter', sans-serif; font-size: 1rem; margin-bottom: 16px; outline: none; transition: border-color .2s; }
+input[type=number]:focus { border-color: var(--ink); }
+.btn { width: 100%; padding: 12px; border: none; font-family: 'Inter', sans-serif; font-size: 0.85rem; font-weight: 700; text-transform: uppercase; letter-spacing: .1em; cursor: pointer; transition: opacity .2s; color: #fff; }
+.btn-ts { background: var(--accent); } .btn-mor { background: var(--accent-3); } .btn-ib { background: var(--accent-4); }
 .btn:hover { opacity: 0.85; }
-.result { margin-top: 16px; padding: 14px; border-radius: 10px; text-align: center; font-size: 1.3rem; font-weight: 700; min-height: 56px; display: flex; align-items: center; justify-content: center; }
-.result-ts { background: rgba(231,76,60,0.1); color: #c0392b; }
-.result-mor { background: rgba(243,156,18,0.1); color: #d68910; }
-.result-ib { background: rgba(142,68,173,0.1); color: #6c3483; }
-.info { text-align: left; font-size: 0.85rem; color: #2c3e50; margin-top: 32px; line-height: 1.7; grid-column: 1 / -1; }
-.info strong { color: #1a1a2e; }
-.range-hint { font-size: 0.75rem; color: #5d6d7e; margin-bottom: 16px; }
-.table-card { background: rgba(255,255,255,0.7); border-radius: 16px; padding: 24px; border: 1px solid rgba(0,0,0,0.1); backdrop-filter: blur(10px); }
-.table-card h2 { font-size: 1.2rem; line-height: var(--lh); margin-bottom: 8px; color: #1a5276; }
-.table-card .caption { font-size: 0.82rem; line-height: var(--lh); color: #2c3e50; margin-bottom: 16px; }
+.result { margin-top: 16px; padding: 16px; text-align: center; font-family: 'Space Mono', monospace; font-size: 1.4rem; font-weight: 700; min-height: 56px; display: flex; align-items: center; justify-content: center; background: #f4f5f6; }
+.result-ts { color: var(--accent); } .result-mor { color: var(--accent-3); } .result-ib { color: var(--accent-4); }
+.range-hint { font-family: 'Space Mono', monospace; font-size: 0.7rem; color: var(--ink-soft); margin-bottom: 16px; letter-spacing: .02em; }
+/* table */
+.table-card { background: var(--paper); border: 1px solid var(--line); border-top: 3px solid var(--ink); padding: 24px; }
+.table-card h2 { font-size: 1.25rem; line-height: var(--lh); font-weight: 700; margin-bottom: 8px; letter-spacing: -0.01em; }
+.table-card .caption { font-size: 0.85rem; line-height: var(--lh); color: var(--ink-soft); margin-bottom: 16px; }
 .table-wrap { overflow-x: auto; }
 table.comp { width: 100%; border-collapse: collapse; font-size: 0.78rem; line-height: 1.4; }
-table.comp th, table.comp td { text-align: left; padding: 8px 10px; border-bottom: 1px solid rgba(0,0,0,0.1); vertical-align: top; }
-table.comp thead th { background: rgba(26,82,118,0.1); color: #1a5276; font-weight: 700; position: sticky; top: 0; }
-table.comp tbody tr:hover { background: rgba(133,193,233,0.15); }
-table.comp td.num { text-align: right; font-family: 'Courier New', monospace; }
-table.comp .shell { font-weight: 700; color: #1a1a2e; }
+table.comp th, table.comp td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+table.comp thead th { background: var(--ink); color: #fff; font-family: 'Space Mono', monospace; font-size: 0.7rem; text-transform: uppercase; letter-spacing: .04em; font-weight: 700; position: sticky; top: 0; }
+table.comp tbody tr:hover { background: #f4f5f6; }
+table.comp td.num { text-align: right; font-family: 'Space Mono', monospace; }
+table.comp .shell { font-weight: 700; color: var(--ink); }
 table.comp .sci { font-style: italic; }
-table.comp a { color: #2980b9; text-decoration: none; }
+table.comp a { color: var(--accent); text-decoration: none; }
 table.comp a:hover { text-decoration: underline; }
-.table-note { font-size: 0.72rem; color: #5d6d7e; margin-top: 12px; line-height: 1.6; }
-@media (max-width: 900px) { .models-col { grid-column: 1 / -1; } .table-col { grid-column: 1 / -1; } }
+.table-note { font-family: 'Space Mono', monospace; font-size: 0.68rem; color: var(--ink-soft); margin-top: 12px; line-height: 1.6; }
+/* info block centered */
+.info { text-align: center; font-size: 0.9rem; color: var(--ink-soft); margin-top: 48px; line-height: 1.8; grid-column: 2 / 12; padding-top: 24px; border-top: 2px solid var(--ink); }
+.info strong { color: var(--ink); font-weight: 700; }
+.info .devby { font-family: 'Space Mono', monospace; text-transform: uppercase; letter-spacing: .08em; font-size: 0.8rem; color: var(--ink); margin-top: 16px; display: block; }
+/* grid overlay - same content box */
+.guides { position: absolute; inset: 0; pointer-events: none; z-index: 60; opacity: 0; transition: opacity .26s ease; }
+body.grid-on .guides { opacity: 1; }
+.guides .cols { position: absolute; top: 0; bottom: 0; left: 0; right: 0; display: grid; grid-template-columns: repeat(var(--cols), 1fr); column-gap: var(--gutter); }
+.guides .col { background: var(--g-col); box-shadow: inset 1px 0 0 var(--g-edge), inset -1px 0 0 var(--g-edge); position: relative; }
+.guides .col span { position: absolute; top: 4px; left: 0; right: 0; text-align: center; font-family: 'Space Mono', monospace; font-size: 10px; line-height: 1; color: var(--accent); }
+.guides .rows { position: absolute; inset: 0; background-image: repeating-linear-gradient(to bottom, var(--g-base) 0 1px, transparent 1px var(--lh)), repeating-linear-gradient(to bottom, var(--g-base-min) 0 1px, transparent 1px var(--bl)); }
+.toggle { position: fixed; top: 18px; left: 18px; z-index: 200; display: flex; align-items: center; gap: 10px; background: var(--ink); color: #fff; border: none; cursor: pointer; font-family: 'Space Mono', monospace; font-size: 12px; letter-spacing: .14em; text-transform: uppercase; padding: 11px 14px; }
+.toggle .dot { width: 9px; height: 9px; border-radius: 50%; background: #555; }
+body.grid-on .toggle { background: var(--accent); }
+body.grid-on .toggle .dot { background: #fff; }
+/* agent widget - enlarged */
+#agent-fab { position: fixed; bottom: 24px; right: 24px; z-index: 9999; background: var(--ink); color: #fff; border: none; border-radius: 50%; width: 64px; height: 64px; font-family: 'Space Mono', monospace; font-size: 1.6rem; cursor: pointer; box-shadow: 0 4px 20px rgba(0,0,0,0.25); }
+#agent-fab:hover { background: var(--accent); }
+#agent-panel { position: fixed; bottom: 104px; right: 24px; z-index: 9999; width: 480px; max-width: calc(100vw - 48px); height: 640px; max-height: calc(100vh - 140px); background: var(--paper); border: 1px solid var(--ink); box-shadow: 0 8px 40px rgba(0,0,0,0.2); display: none; flex-direction: column; overflow: hidden; font-family: 'Inter', sans-serif; }
+#agent-panel.open { display: flex; }
+#agent-head { background: var(--ink); color: #fff; padding: 16px 18px; font-size: 1.05rem; font-weight: 700; display: flex; justify-content: space-between; align-items: center; }
+#agent-head span.sub { font-family: 'Space Mono', monospace; font-size: 0.7rem; letter-spacing: .1em; text-transform: uppercase; opacity: 0.7; font-weight: 400; }
+#agent-close { background: none; border: none; color: #fff; font-size: 1.3rem; cursor: pointer; line-height: 1; }
+#agent-log { flex: 1; overflow-y: auto; padding: 18px; display: flex; flex-direction: column; gap: 14px; }
+.agent-msg { max-width: 88%; padding: 10px 14px; font-size: 0.95rem; line-height: 1.55; white-space: pre-wrap; }
+.agent-msg.bot { background: #f4f5f6; color: var(--ink); align-self: flex-start; border-left: 3px solid var(--accent); }
+.agent-msg.user { background: var(--ink); color: #fff; align-self: flex-end; }
+.agent-msg.label { font-family: 'Space Mono', monospace; font-size: 0.65rem; letter-spacing: .08em; text-transform: uppercase; opacity: 0.6; padding: 0; background: none; border: none; }
+#agent-form { display: flex; border-top: 1px solid var(--line); }
+#agent-input { flex: 1; border: none; padding: 14px; font-size: 0.95rem; font-family: 'Inter', sans-serif; outline: none; }
+#agent-send { background: var(--ink); color: #fff; border: none; padding: 0 22px; cursor: pointer; font-family: 'Space Mono', monospace; font-size: 0.85rem; text-transform: uppercase; letter-spacing: .08em; font-weight: 700; }
+#agent-send:hover { background: var(--accent); }
+#agent-send:disabled { opacity: 0.5; cursor: default; }
+@media (max-width: 900px) { .models-col { grid-column: 1 / -1; } .table-col { grid-column: 1 / -1; } .info { grid-column: 1 / -1; } #agent-panel { width: calc(100vw - 48px); height: calc(100vh - 140px); } }
 </style>
 </head>
-<body>
-<div class="container">
-<div class="grid">
-<header>
-<h1>Shell-Based Particleboard Property Predictor</h1>
-<p class="subtitle">Random Forest Linear Equations &mdash; Predict TS, MOR, and IB from input properties</p>
-</header>
-<div class="main-layout">
-<div class="models-col">
-<div class="model-card card-ts">
-<h2>Thickness Swelling (TS)</h2>
-<div class="equation">TS = 0.0027 &times; Density + 0.2743 &times; WA &minus; 2.3678</div>
-<label for="ts-density">Density (kg/m&sup3;)</label>
-<input type="number" id="ts-density" placeholder="e.g. 900" step="any">
-<label for="ts-wa">Water Absorption (%)</label>
-<input type="number" id="ts-wa" placeholder="e.g. 50" step="any">
-<div class="range-hint">Typical ranges: Density 518&ndash;1585 kg/m&sup3;, WA 5&ndash;90%</div>
-<button class="btn btn-ts" onclick="calcTS()">Predict TS</button>
-<div class="result result-ts" id="ts-result">&mdash;</div>
-</div>
-<div class="model-card card-mor">
-<h2>Modulus of Rupture (MOR)</h2>
-<div class="equation">MOR = 0.0055 &times; Density + 0.0021 &times; MOE + 1.4443</div>
-<label for="mor-density">Density (kg/m&sup3;)</label>
-<input type="number" id="mor-density" placeholder="e.g. 900" step="any">
-<label for="mor-moe">Modulus of Elasticity (MPa)</label>
-<input type="number" id="mor-moe" placeholder="e.g. 2000" step="any">
-<div class="range-hint">Typical ranges: Density 518&ndash;1585 kg/m&sup3;, MOE 11&ndash;4190 MPa</div>
-<button class="btn btn-mor" onclick="calcMOR()">Predict MOR</button>
-<div class="result result-mor" id="mor-result">&mdash;</div>
-</div>
-<div class="model-card card-ib">
-<h2>Internal Bond Strength (IB)</h2>
-<div class="equation">IB = 0.0054 &times; Density + 0.0007 &times; MOE &minus; 4.0890</div>
-<label for="ib-density">Density (kg/m&sup3;)</label>
-<input type="number" id="ib-density" placeholder="e.g. 900" step="any">
-<label for="ib-moe">Modulus of Elasticity (MPa)</label>
-<input type="number" id="ib-moe" placeholder="e.g. 2000" step="any">
-<div class="range-hint">Typical ranges: Density 518&ndash;1585 kg/m&sup3;, MOE 11&ndash;4190 MPa</div>
-<button class="btn btn-ib" onclick="calcIB()">Predict IB</button>
-<div class="result result-ib" id="ib-result">&mdash;</div>
-</div>
-</div>
-<div class="table-col">
-<div class="table-card">
-<h2>Shell Feedstock: Chemical Composition &amp; Botanical Reference</h2>
-<p class="caption">Lignocellulosic composition (weight %) and taxonomic details for the nut/seed shells used as particleboard feedstock.</p>
-<div class="table-wrap">
-<table class="comp">
-<thead>
-<tr>
-<th>Shell type</th>
-<th>Cellulose (wt.%)</th>
-<th>Hemicellulose (wt.%)</th>
-<th>Lignin (wt.%)</th>
-<th>Ash (wt.%)</th>
-<th>Scientific name (binomial)</th>
-<th>Genus</th>
-<th>Botanical family</th>
-<th>Shell / plant part</th>
-<th>Native origin</th>
-</tr>
-</thead>
-<tbody>
-<tr><td class="shell">Macadamia shell</td><td class="num">29.53</td><td class="num">30.03</td><td class="num">40.14</td><td class="num">0.30</td><td class="sci">Macadamia integrifolia / M. tetraphylla <a href="https://en.wikipedia.org/wiki/Macadamia" target="_blank" rel="noopener">[ref]</a></td><td>Macadamia</td><td>Proteaceae <a href="https://en.wikipedia.org/wiki/Macadamia" target="_blank" rel="noopener">[ref]</a></td><td>Woody endocarp (nut shell)</td><td>NE New South Wales &amp; Queensland, Australia <a href="https://en.wikipedia.org/wiki/Macadamia" target="_blank" rel="noopener">[ref]</a></td></tr>
-<tr><td class="shell">Hazelnut shell</td><td class="num">46.90</td><td class="num">14.77</td><td class="num">37.47</td><td class="num">0.87</td><td class="sci">Corylus avellana <a href="https://www.britannica.com/plant/hazelnut" target="_blank" rel="noopener">[ref]</a></td><td>Corylus</td><td>Betulaceae (birch family) <a href="https://www.britannica.com/plant/hazelnut" target="_blank" rel="noopener">[ref]</a></td><td>Hard woody nut shell (pericarp)</td><td>North temperate zone; Europe, N. Africa, W. Asia <a href="https://landscapeplants.oregonstate.edu/plants/corylus-avellana" target="_blank" rel="noopener">[ref]</a></td></tr>
-<tr><td class="shell">Almond shell</td><td class="num">33.53</td><td class="num">30.53</td><td class="num">32.75</td><td class="num">3.20</td><td class="sci">Prunus dulcis (syn. Amygdalus communis) <a href="https://pubchem.ncbi.nlm.nih.gov/taxonomy/Prunus-dulcis" target="_blank" rel="noopener">[ref]</a></td><td>Prunus</td><td>Rosaceae (rose family) <a href="https://www.dr.hauschka.com/en_NZ/knowledge-base/medicinal-plant-facts/almond-tree/" target="_blank" rel="noopener">[ref]</a></td><td>Woody endocarp (drupe shell/husk)</td><td>SW/Central Asia, Middle East, Mediterranean <a href="https://gd.eppo.int/taxon/PRNDU" target="_blank" rel="noopener">[ref]</a></td></tr>
-<tr><td class="shell">Walnut shell</td><td class="num">22.44</td><td class="num">23.86</td><td class="num">50.46</td><td class="num">3.25</td><td class="sci">Juglans regia <a href="https://www.woodlandtrust.org.uk/trees-woods-and-wildlife/british-trees/a-z-of-british-trees/walnut/" target="_blank" rel="noopener">[ref]</a></td><td>Juglans</td><td>Juglandaceae (walnut family) <a href="https://www.woodlandtrust.org.uk/trees-woods-and-wildlife/british-trees/a-z-of-british-trees/walnut/" target="_blank" rel="noopener">[ref]</a></td><td>Woody endocarp (drupe shell)</td><td>SE Europe to SW/Central Asia &amp; China <a href="https://www.britannica.com/plant/walnut-tree-and-nut" target="_blank" rel="noopener">[ref]</a></td></tr>
-<tr><td class="shell">Tea oil Camellia shell</td><td class="num">19.63</td><td class="num">37.23</td><td class="num">40.98</td><td class="num">2.16</td><td class="sci">Camellia oleifera <a href="https://edis.ifas.ufl.edu/publication/ST116" target="_blank" rel="noopener">[ref]</a></td><td>Camellia</td><td>Theaceae (tea family) <a href="https://edis.ifas.ufl.edu/publication/ST116" target="_blank" rel="noopener">[ref]</a></td><td>Seed capsule / fruit shell (pericarp)</td><td>Southern China to N. Indo-China <a href="https://plants.ces.ncsu.edu/plants/camellia-oleifera/" target="_blank" rel="noopener">[ref]</a></td></tr>
-<tr><td class="shell">Coconut shell</td><td class="num">31.55</td><td class="num">32.86</td><td class="num">34.88</td><td class="num">0.71</td><td class="sci">Cocos nucifera <a href="https://www.britannica.com/plant/coconut-palm" target="_blank" rel="noopener">[ref]</a></td><td>Cocos</td><td>Arecaceae (palm family) <a href="https://www.britannica.com/plant/coconut-palm" target="_blank" rel="noopener">[ref]</a></td><td>Hard endocarp (stone within husk)</td><td>Central Indo-Pacific / SE Asia &amp; Melanesia <a href="https://en.wikipedia.org/wiki/Coconut" target="_blank" rel="noopener">[ref]</a></td></tr>
-<tr><td class="shell">Palm kernel shell</td><td class="num">16.90</td><td class="num">18.90</td><td class="num">61.60</td><td class="num">2.60</td><td class="sci">Elaeis guineensis <a href="https://www.monaconatureencyclopedia.com/elaeis-guineensis/?lang=en" target="_blank" rel="noopener">[ref]</a></td><td>Elaeis</td><td>Arecaceae (palm family) <a href="https://www.monaconatureencyclopedia.com/elaeis-guineensis/?lang=en" target="_blank" rel="noopener">[ref]</a></td><td>Endocarp shell enclosing kernel</td><td>West/Central Africa <a href="https://www.monaconatureencyclopedia.com/elaeis-guineensis/?lang=en" target="_blank" rel="noopener">[ref]</a></td></tr>
-<tr><td class="shell">Mango seed shell</td><td class="num">58.90</td><td class="num">34.00</td><td class="num">7.10</td><td class="num">0.00*</td><td class="sci">Mangifera indica <a href="https://www.cabidigitallibrary.org/doi/full/10.1079/cabicompendium.34505" target="_blank" rel="noopener">[ref]</a></td><td>Mangifera</td><td>Anacardiaceae (cashew/sumac family) <a href="https://www.britannica.com/plant/mango-plant-and-fruit" target="_blank" rel="noopener">[ref]</a></td><td>Fibrous seed husk (endocarp)</td><td>Indo-Burma region (NE India, Bangladesh, Myanmar) <a href="https://www.cabidigitallibrary.org/doi/full/10.1079/cabicompendium.34505" target="_blank" rel="noopener">[ref]</a></td></tr>
-<tr><td class="shell">Groundnut shell</td><td class="num">36.20</td><td class="num">26.80</td><td class="num">52.50</td><td class="num">14.50</td><td class="sci">Arachis hypogaea <a href="https://pubchem.ncbi.nlm.nih.gov/taxonomy/3818" target="_blank" rel="noopener">[ref]</a></td><td>Arachis</td><td>Fabaceae / Leguminosae (legume family) <a href="https://www.britannica.com/plant/peanut" target="_blank" rel="noopener">[ref]</a></td><td>Legume pod hull (pericarp)</td><td>South America (S. Bolivia / N. Argentina) <a href="https://oar.icrisat.org/5386/1/GroundnutChapter9_1977.pdf" target="_blank" rel="noopener">[ref]</a></td></tr>
-</tbody>
-</table>
-</div>
-<p class="table-note">* Reported as ~0 / not detected in the cited source. Composition values are indicative literature figures and may vary with cultivar, maturity, and analytical method. Click [ref] links for taxonomic and origin sources.</p>
-</div>
-</div>
-</div>
-<p class="info">This web application uses a trained Random Forest (RF) to predict the thickness swelling (TS), modulus of rupture (MOR) and internal bond strength.<br>It provides fast estimates of the shell-based particleboards' properties with TS at R&sup2; value of 0.83, MOR R&sup2; value of 0.852, and IB R&sup2; value of 0.75. Random Forest model predictions.<br>The model was trained on data defined over specific value ranges, so users should enter numerical values only within the indicated intervals for each input parameter.<br><strong>Developed by Derrick Mirindi &amp; David Sinkhonde</strong></p>
-</div>
-</div>
-<script>
-function calcTS() {
-const d = parseFloat(document.getElementById('ts-density').value);
-const wa = parseFloat(document.getElementById('ts-wa').value);
-const el = document.getElementById('ts-result');
-if (isNaN(d) || isNaN(wa)) { el.textContent = 'Please enter both values'; return; }
-const ts = 0.0027 * d + 0.2743 * wa - 2.3678;
-el.textContent = 'TS = ' + ts.toFixed(2) + ' %';
-}
-function calcMOR() {
-const d = parseFloat(document.getElementById('mor-density').value);
-const moe = parseFloat(document.getElementById('mor-moe').value);
-const el = document.getElementById('mor-result');
-if (isNaN(d) || isNaN(moe)) { el.textContent = 'Please enter both values'; return; }
-const mor = 0.0055 * d + 0.0021 * moe + 1.4443;
-el.textContent = 'MOR = ' + mor.toFixed(2) + ' MPa';
-}
-function calcIB() {
-const d = parseFloat(document.getElementById('ib-density').value);
-const moe = parseFloat(document.getElementById('ib-moe').value);
-const el = document.getElementById('ib-result');
-if (isNaN(d) || isNaN(moe)) { el.textContent = 'Please enter both values'; return; }
-const ib = 0.0054 * d + 0.0007 * moe - 4.0890;
-el.textContent = 'IB = ' + ib.toFixed(4) + ' MPa';
-}
-</script>
-  
-<!-- Particleboard Agent Widget -->
-<style>
-  #agent-fab { position: fixed; bottom: 24px; right: 24px; z-index: 9999; background: #1a1a2e; color: #fff; border: none; border-radius: 50%; width: 60px; height: 60px; font-size: 1.5rem; cursor: pointer; box-shadow: 0 4px 20px rgba(0,0,0,0.25); font-family: 'Times New Roman', Times, serif; }
-  #agent-fab:hover { opacity: 0.9; }
-  #agent-panel { position: fixed; bottom: 96px; right: 24px; z-index: 9999; width: 360px; max-width: calc(100vw - 48px); height: 480px; max-height: calc(100vh - 140px); background: #fff; border: 1px solid rgba(0,0,0,0.15); border-radius: 8px; box-shadow: 0 8px 40px rgba(0,0,0,0.2); display: none; flex-direction: column; overflow: hidden; font-family: 'Times New Roman', Times, serif; }
-  #agent-panel.open { display: flex; }
-  #agent-head { background: #1a1a2e; color: #fff; padding: 12px 16px; font-size: 1rem; font-weight: 600; display: flex; justify-content: space-between; align-items: center; }
-  #agent-head span.sub { font-size: 0.7rem; letter-spacing: 0.08em; text-transform: uppercase; opacity: 0.7; }
-  #agent-close { background: none; border: none; color: #fff; font-size: 1.2rem; cursor: pointer; line-height: 1; }
-  #agent-log { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 12px; }
-  .agent-msg { max-width: 85%; padding: 8px 12px; border-radius: 6px; font-size: 0.9rem; line-height: 1.5; white-space: pre-wrap; }
-  .agent-msg.bot { background: #f4f4f7; color: #1a1a2e; align-self: flex-start; border: 1px solid rgba(0,0,0,0.08); }
-  .agent-msg.user { background: #1a1a2e; color: #fff; align-self: flex-end; }
-  .agent-msg.label { font-size: 0.65rem; letter-spacing: 0.08em; text-transform: uppercase; opacity: 0.6; padding: 0; background: none; border: none; }
-  #agent-form { display: flex; border-top: 1px solid rgba(0,0,0,0.1); }
-  #agent-input { flex: 1; border: none; padding: 12px; font-size: 0.9rem; font-family: 'Times New Roman', Times, serif; outline: none; }
-  #agent-send { background: #1a1a2e; color: #fff; border: none; padding: 0 18px; cursor: pointer; font-family: 'Times New Roman', Times, serif; font-weight: 600; }
-  #agent-send:disabled { opacity: 0.5; cursor: default; }
-</style>
-<button id="agent-fab" aria-label="Open assistant">?</button>
-<div id="agent-panel" role="dialog" aria-label="Particleboard Agent">
-  <div id="agent-head"><span>Agent Assistant<br><span class="sub">Shell-based panels</span></span><button id="agent-close" aria-label="Close">&times;</button></div>
-  <div id="agent-log"></div>
-  <form id="agent-form">
-    <input id="agent-input" type="text" placeholder="Ask about TS, MOR, IB..." autocomplete="off" />
-    <button id="agent-send" type="submit">Send</button>
-  </form>
-</div>
-<script>
-(function(){
-  var API = 'https://shell-gemini.mirindiderick.workers.dev/';
-  var fab = document.getElementById('agent-fab');
-  var panel = document.getElementById('agent-panel');
-  var closeBtn = document.getElementById('agent-close');
-  var log = document.getElementById('agent-log');
-  var form = document.getElementById('agent-form');
-  var input = document.getElementById('agent-input');
-  var sendBtn = document.getElementById('agent-send');
-  var greeted = false;
-  function strip(t){ return String(t).replace(/\*\*/g, '').replace(/^\s*\*\s?/gm, '\u2022 '); }
-  function add(text, cls, label){
-    if(label){ var l=document.createElement('div'); l.className='agent-msg label'; l.textContent=label; log.appendChild(l); }
-    var d=document.createElement('div'); d.className='agent-msg '+cls; d.textContent=text; log.appendChild(d); log.scrollTop=log.scrollHeight;
-  }
-  function openPanel(){ panel.classList.add('open'); if(!greeted){ add('Hello. I can help you predict and understand shell-based particleboard properties. Ask a question or pick an example.', 'bot', 'Agent'); greeted=true; } input.focus(); }
-  fab.addEventListener('click', function(){ panel.classList.contains('open') ? panel.classList.remove('open') : openPanel(); });
-  closeBtn.addEventListener('click', function(){ panel.classList.remove('open'); });
-  form.addEventListener('submit', function(e){
-    e.preventDefault();
-    var msg = input.value.trim(); if(!msg) return;
-    add(msg, 'user', 'You'); input.value=''; sendBtn.disabled=true;
-    var thinking=document.createElement('div'); thinking.className='agent-msg bot'; thinking.textContent='Thinking...'; log.appendChild(thinking); log.scrollTop=log.scrollHeight;
-    fetch(API, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ message: msg }) })
-      .then(function(r){ return r.json(); })
-      .then(function(data){ thinking.remove(); add(strip(data.reply || 'No response.'), 'bot', 'Agent'); })
-      .catch(function(){ thinking.remove(); add('Sorry, something went wrong. Please try again.', 'bot', 'Agent'); })
-      .finally(function(){ sendBtn.disabled=false; input.focus(); });
-  });
-})();
-</script>
-</body>
-</html>
