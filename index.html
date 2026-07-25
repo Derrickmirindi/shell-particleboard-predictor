@@ -110,3 +110,156 @@ body.grid-on .toggle .dot { background: #fff; }
 @media (max-width: 900px) { .models-col { grid-column: 1 / -1; } .table-col { grid-column: 1 / -1; } .info { grid-column: 1 / -1; } #agent-panel { width: calc(100vw - 48px); height: calc(100vh - 140px); } }
 </style>
 </head>
+<body>
+<button class="toggle" id="gridToggle" aria-pressed="false"><span class="dot"></span><span class="lbl">Show grid</span></button>
+<div class="wrap">
+<div class="grid">
+<header class="masthead-band">
+<div class="kicker">Materials Science / Composite Panels</div>
+<h1 class="masthead">Shell-Based Particleboard Property Predictor</h1>
+<p class="subtitle">Linear regression predictions of TS, MOR, and IB from input properties</p>
+</header>
+<div class="band">
+<div class="models-col">
+<div class="model-card card-ts">
+<div class="num">01 / Thickness Swelling</div>
+<h2>Thickness Swelling (TS)</h2>
+<div class="equation">TS = 0.0027 &times; Density + 0.2743 &times; WA &minus; 2.3678</div>
+<label for="ts-density">Density (kg/m&sup3;)</label>
+<input type="number" id="ts-density" placeholder="e.g. 900" step="any">
+<label for="ts-wa">Water Absorption (%)</label>
+<input type="number" id="ts-wa" placeholder="e.g. 50" step="any">
+<div class="range-hint">Typical ranges: Density 518&ndash;1585 kg/m&sup3;, WA 5&ndash;90%</div>
+<button class="btn btn-ts" onclick="calcTS()">Predict TS</button>
+<div class="result result-ts" id="ts-result">&mdash;</div>
+</div>
+<div class="model-card card-mor">
+<div class="num">02 / Modulus of Rupture</div>
+<h2>Modulus of Rupture (MOR)</h2>
+<div class="equation">MOR = 0.0055 &times; Density + 0.0021 &times; MOE + 1.4443</div>
+<label for="mor-density">Density (kg/m&sup3;)</label>
+<input type="number" id="mor-density" placeholder="e.g. 900" step="any">
+<label for="mor-moe">Modulus of Elasticity (MPa)</label>
+<input type="number" id="mor-moe" placeholder="e.g. 2000" step="any">
+<div class="range-hint">Typical ranges: Density 518&ndash;1585 kg/m&sup3;, MOE 11&ndash;4190 MPa</div>
+<button class="btn btn-mor" onclick="calcMOR()">Predict MOR</button>
+<div class="result result-mor" id="mor-result">&mdash;</div>
+</div>
+<div class="model-card card-ib">
+<div class="num">03 / Internal Bond Strength</div>
+<h2>Internal Bond Strength (IB)</h2>
+<div class="equation">IB = 0.0054 &times; Density + 0.0007 &times; MOE &minus; 4.0890</div>
+<label for="ib-density">Density (kg/m&sup3;)</label>
+<input type="number" id="ib-density" placeholder="e.g. 900" step="any">
+<label for="ib-moe">Modulus of Elasticity (MPa)</label>
+<input type="number" id="ib-moe" placeholder="e.g. 2000" step="any">
+<div class="range-hint">Typical ranges: Density 518&ndash;1585 kg/m&sup3;, MOE 11&ndash;4190 MPa</div>
+<button class="btn btn-ib" onclick="calcIB()">Predict IB</button>
+<div class="result result-ib" id="ib-result">&mdash;</div>
+</div>
+</div>
+<div class="table-col">
+<div class="table-card">
+<h2>Shell Feedstock: Chemical Composition &amp; Botanical Reference</h2>
+<p class="caption">Lignocellulosic composition (weight %) and taxonomic details for the nut/seed shells used as particleboard feedstock.</p>
+<div class="table-wrap">
+<table class="comp">
+<thead><tr><th>Shell type</th><th>Cellulose</th><th>Hemicellulose</th><th>Lignin</th><th>Ash</th><th>Scientific name</th><th>Genus</th><th>Botanical family</th><th>Shell / plant part</th><th>Native origin</th></tr></thead>
+<tbody>
+<tr><td class="shell">Macadamia shell</td><td class="num">29.53</td><td class="num">30.03</td><td class="num">40.14</td><td class="num">0.30</td><td class="sci">Macadamia integrifolia / M. tetraphylla <a href="https://en.wikipedia.org/wiki/Macadamia" target="_blank" rel="noopener">[ref]</a></td><td>Macadamia</td><td>Proteaceae <a href="https://en.wikipedia.org/wiki/Macadamia" target="_blank" rel="noopener">[ref]</a></td><td>Woody endocarp (nut shell)</td><td>NE New South Wales &amp; Queensland, Australia <a href="https://en.wikipedia.org/wiki/Macadamia" target="_blank" rel="noopener">[ref]</a></td></tr>
+<tr><td class="shell">Hazelnut shell</td><td class="num">46.90</td><td class="num">14.77</td><td class="num">37.47</td><td class="num">0.87</td><td class="sci">Corylus avellana <a href="https://www.britannica.com/plant/hazelnut" target="_blank" rel="noopener">[ref]</a></td><td>Corylus</td><td>Betulaceae (birch family) <a href="https://www.britannica.com/plant/hazelnut" target="_blank" rel="noopener">[ref]</a></td><td>Hard woody nut shell (pericarp)</td><td>North temperate zone; Europe, N. Africa, W. Asia <a href="https://landscapeplants.oregonstate.edu/plants/corylus-avellana" target="_blank" rel="noopener">[ref]</a></td></tr>
+<tr><td class="shell">Almond shell</td><td class="num">33.53</td><td class="num">30.53</td><td class="num">32.75</td><td class="num">3.20</td><td class="sci">Prunus dulcis (syn. Amygdalus communis) <a href="https://pubchem.ncbi.nlm.nih.gov/taxonomy/Prunus-dulcis" target="_blank" rel="noopener">[ref]</a></td><td>Prunus</td><td>Rosaceae (rose family) <a href="https://www.dr.hauschka.com/en_NZ/knowledge-base/medicinal-plant-facts/almond-tree/" target="_blank" rel="noopener">[ref]</a></td><td>Woody endocarp (drupe shell/husk)</td><td>SW/Central Asia, Middle East, Mediterranean <a href="https://gd.eppo.int/taxon/PRNDU" target="_blank" rel="noopener">[ref]</a></td></tr>
+<tr><td class="shell">Walnut shell</td><td class="num">22.44</td><td class="num">23.86</td><td class="num">50.46</td><td class="num">3.25</td><td class="sci">Juglans regia <a href="https://www.woodlandtrust.org.uk/trees-woods-and-wildlife/british-trees/a-z-of-british-trees/walnut/" target="_blank" rel="noopener">[ref]</a></td><td>Juglans</td><td>Juglandaceae (walnut family) <a href="https://www.woodlandtrust.org.uk/trees-woods-and-wildlife/british-trees/a-z-of-british-trees/walnut/" target="_blank" rel="noopener">[ref]</a></td><td>Woody endocarp (drupe shell)</td><td>SE Europe to SW/Central Asia &amp; China <a href="https://www.britannica.com/plant/walnut-tree-and-nut" target="_blank" rel="noopener">[ref]</a></td></tr>
+<tr><td class="shell">Tea oil Camellia shell</td><td class="num">19.63</td><td class="num">37.23</td><td class="num">40.98</td><td class="num">2.16</td><td class="sci">Camellia oleifera <a href="https://edis.ifas.ufl.edu/publication/ST116" target="_blank" rel="noopener">[ref]</a></td><td>Camellia</td><td>Theaceae (tea family) <a href="https://edis.ifas.ufl.edu/publication/ST116" target="_blank" rel="noopener">[ref]</a></td><td>Seed capsule / fruit shell (pericarp)</td><td>Southern China to N. Indo-China <a href="https://plants.ces.ncsu.edu/plants/camellia-oleifera/" target="_blank" rel="noopener">[ref]</a></td></tr>
+<tr><td class="shell">Coconut shell</td><td class="num">31.55</td><td class="num">32.86</td><td class="num">34.88</td><td class="num">0.71</td><td class="sci">Cocos nucifera <a href="https://www.britannica.com/plant/coconut-palm" target="_blank" rel="noopener">[ref]</a></td><td>Cocos</td><td>Arecaceae (palm family) <a href="https://www.britannica.com/plant/coconut-palm" target="_blank" rel="noopener">[ref]</a></td><td>Hard endocarp (stone within husk)</td><td>Central Indo-Pacific / SE Asia &amp; Melanesia <a href="https://en.wikipedia.org/wiki/Coconut" target="_blank" rel="noopener">[ref]</a></td></tr>
+<tr><td class="shell">Palm kernel shell</td><td class="num">16.90</td><td class="num">18.90</td><td class="num">61.60</td><td class="num">2.60</td><td class="sci">Elaeis guineensis <a href="https://www.monaconatureencyclopedia.com/elaeis-guineensis/?lang=en" target="_blank" rel="noopener">[ref]</a></td><td>Elaeis</td><td>Arecaceae (palm family) <a href="https://www.monaconatureencyclopedia.com/elaeis-guineensis/?lang=en" target="_blank" rel="noopener">[ref]</a></td><td>Endocarp shell enclosing kernel</td><td>West/Central Africa <a href="https://www.monaconatureencyclopedia.com/elaeis-guineensis/?lang=en" target="_blank" rel="noopener">[ref]</a></td></tr>
+<tr><td class="shell">Mango seed shell</td><td class="num">58.90</td><td class="num">34.00</td><td class="num">7.10</td><td class="num">0.00*</td><td class="sci">Mangifera indica <a href="https://www.cabidigitallibrary.org/doi/full/10.1079/cabicompendium.34505" target="_blank" rel="noopener">[ref]</a></td><td>Mangifera</td><td>Anacardiaceae (cashew/sumac family) <a href="https://www.britannica.com/plant/mango-plant-and-fruit" target="_blank" rel="noopener">[ref]</a></td><td>Fibrous seed husk (endocarp)</td><td>Indo-Burma region (NE India, Bangladesh, Myanmar) <a href="https://www.cabidigitallibrary.org/doi/full/10.1079/cabicompendium.34505" target="_blank" rel="noopener">[ref]</a></td></tr>
+<tr><td class="shell">Groundnut shell</td><td class="num">36.20</td><td class="num">26.80</td><td class="num">52.50</td><td class="num">14.50</td><td class="sci">Arachis hypogaea <a href="https://pubchem.ncbi.nlm.nih.gov/taxonomy/3818" target="_blank" rel="noopener">[ref]</a></td><td>Arachis</td><td>Fabaceae / Leguminosae (legume family) <a href="https://www.britannica.com/plant/peanut" target="_blank" rel="noopener">[ref]</a></td><td>Legume pod hull (pericarp)</td><td>South America (S. Bolivia / N. Argentina) <a href="https://oar.icrisat.org/5386/1/GroundnutChapter9_1977.pdf" target="_blank" rel="noopener">[ref]</a></td></tr>
+</tbody>
+</table>
+</div>
+<p class="table-note">* Reported as ~0 / not detected in the cited source. Composition values are indicative literature figures and may vary with cultivar, maturity, and analytical method. Click [ref] links for taxonomic and origin sources.</p>
+</div>
+</div>
+</div>
+<div class="info">This web application uses a trained Random Forest (RF) to predict the thickness swelling (TS), modulus of rupture (MOR) and internal bond strength. It provides fast estimates of the shell-based particleboards' properties with TS at R&sup2; value of 0.83, MOR R&sup2; value of 0.852, and IB R&sup2; value of 0.75. Random Forest model predictions. The model was trained on data defined over specific value ranges, so users should enter numerical values only within the indicated intervals for each input parameter.<span class="devby">Developed by Derrick Mirindi &amp; David Sinkhonde</span></div>
+</div>
+<div class="guides" aria-hidden="true"><div class="cols"></div><div class="rows"></div></div>
+</div>
+<button id="agent-fab" aria-label="Open assistant">?</button>
+<div id="agent-panel" role="dialog" aria-label="Particleboard Agent">
+<div id="agent-head"><span>Agent Assistant<br><span class="sub">Shell-based panels</span></span><button id="agent-close" aria-label="Close">&times;</button></div>
+<div id="agent-log"></div>
+<form id="agent-form">
+<input id="agent-input" type="text" placeholder="Ask about TS, MOR, IB..." autocomplete="off">
+<button id="agent-send" type="submit">Send</button>
+</form>
+</div>
+<script>
+function calcTS() {
+var d = parseFloat(document.getElementById('ts-density').value);
+var wa = parseFloat(document.getElementById('ts-wa').value);
+var el = document.getElementById('ts-result');
+if (isNaN(d) || isNaN(wa)) { el.textContent = 'Please enter both values'; return; }
+var ts = 0.0027 * d + 0.2743 * wa - 2.3678;
+el.textContent = 'TS = ' + ts.toFixed(2) + ' %';
+}
+function calcMOR() {
+var d = parseFloat(document.getElementById('mor-density').value);
+var moe = parseFloat(document.getElementById('mor-moe').value);
+var el = document.getElementById('mor-result');
+if (isNaN(d) || isNaN(moe)) { el.textContent = 'Please enter both values'; return; }
+var mor = 0.0055 * d + 0.0021 * moe + 1.4443;
+el.textContent = 'MOR = ' + mor.toFixed(2) + ' MPa';
+}
+function calcIB() {
+var d = parseFloat(document.getElementById('ib-density').value);
+var moe = parseFloat(document.getElementById('ib-moe').value);
+var el = document.getElementById('ib-result');
+if (isNaN(d) || isNaN(moe)) { el.textContent = 'Please enter both values'; return; }
+var ib = 0.0054 * d + 0.0007 * moe - 4.0890;
+el.textContent = 'IB = ' + ib.toFixed(4) + ' MPa';
+}
+// grid overlay toggle
+(function(){
+var btn = document.getElementById('gridToggle');
+function setGrid(on){ document.body.classList.toggle('grid-on', on); if(btn){ btn.setAttribute('aria-pressed', on ? 'true' : 'false'); var l = btn.querySelector('.lbl'); if(l) l.textContent = on ? 'Hide grid' : 'Show grid'; } }
+if(btn) btn.addEventListener('click', function(){ setGrid(!document.body.classList.contains('grid-on')); });
+document.addEventListener('keydown', function(e){ if((e.key==='g'||e.key==='G') && !e.metaKey && !e.ctrlKey && !e.altKey){ var t=e.target.tagName; if(t==='INPUT'||t==='TEXTAREA') return; setGrid(!document.body.classList.contains('grid-on')); } });
+var host = document.querySelector('.guides .cols');
+if(host){ var n = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--cols').trim(),10) || 12; for(var i=1;i<=n;i++){ var c=document.createElement('div'); c.className='col'; var s=document.createElement('span'); s.textContent=i; c.appendChild(s); host.appendChild(c); } }
+})();
+// agent widget
+(function(){
+var API = 'https://shell-gemini.mirindiderick.workers.dev/';
+var fab = document.getElementById('agent-fab');
+var panel = document.getElementById('agent-panel');
+var closeBtn = document.getElementById('agent-close');
+var log = document.getElementById('agent-log');
+var form = document.getElementById('agent-form');
+var input = document.getElementById('agent-input');
+var sendBtn = document.getElementById('agent-send');
+var greeted = false;
+function strip(t){ return String(t).replace(/\*\*/g,'').replace(/^\s*\*\s?/gm,'\u2022 '); }
+function add(text, cls, label){
+if(label){ var l=document.createElement('div'); l.className='agent-msg label'; l.textContent=label; log.appendChild(l); }
+var d=document.createElement('div'); d.className='agent-msg '+cls; d.textContent=text; log.appendChild(d); log.scrollTop=log.scrollHeight;
+}
+function openPanel(){ panel.classList.add('open'); if(!greeted){ add('Hello. I can help you predict and understand shell-based particleboard properties. Ask a question or pick an example.','bot','Agent'); greeted=true; } input.focus(); }
+fab.addEventListener('click', function(){ panel.classList.contains('open') ? panel.classList.remove('open') : openPanel(); });
+closeBtn.addEventListener('click', function(){ panel.classList.remove('open'); });
+form.addEventListener('submit', function(e){
+e.preventDefault();
+var msg = input.value.trim(); if(!msg) return;
+add(msg,'user','You'); input.value=''; sendBtn.disabled=true;
+var thinking=document.createElement('div'); thinking.className='agent-msg bot'; thinking.textContent='Thinking...'; log.appendChild(thinking); log.scrollTop=log.scrollHeight;
+fetch(API, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ message: msg }) })
+.then(function(r){ return r.json(); })
+.then(function(data){ thinking.remove(); add(strip(data.reply || 'No response.'),'bot','Agent'); })
+.catch(function(){ thinking.remove(); add('Sorry, something went wrong. Please try again.','bot','Agent'); })
+.finally(function(){ sendBtn.disabled=false; input.focus(); });
+});
+})();
+</script>
+</body>
+</html>
