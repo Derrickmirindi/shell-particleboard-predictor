@@ -171,5 +171,66 @@ const ib = 0.0054 * d + 0.0007 * moe - 4.0890;
 el.textContent = 'IB = ' + ib.toFixed(4) + ' MPa';
 }
 </script>
+  
+<!-- Particleboard Agent Widget -->
+<style>
+  #agent-fab { position: fixed; bottom: 24px; right: 24px; z-index: 9999; background: #1a1a2e; color: #fff; border: none; border-radius: 50%; width: 60px; height: 60px; font-size: 1.5rem; cursor: pointer; box-shadow: 0 4px 20px rgba(0,0,0,0.25); font-family: 'Times New Roman', Times, serif; }
+  #agent-fab:hover { opacity: 0.9; }
+  #agent-panel { position: fixed; bottom: 96px; right: 24px; z-index: 9999; width: 360px; max-width: calc(100vw - 48px); height: 480px; max-height: calc(100vh - 140px); background: #fff; border: 1px solid rgba(0,0,0,0.15); border-radius: 8px; box-shadow: 0 8px 40px rgba(0,0,0,0.2); display: none; flex-direction: column; overflow: hidden; font-family: 'Times New Roman', Times, serif; }
+  #agent-panel.open { display: flex; }
+  #agent-head { background: #1a1a2e; color: #fff; padding: 12px 16px; font-size: 1rem; font-weight: 600; display: flex; justify-content: space-between; align-items: center; }
+  #agent-head span.sub { font-size: 0.7rem; letter-spacing: 0.08em; text-transform: uppercase; opacity: 0.7; }
+  #agent-close { background: none; border: none; color: #fff; font-size: 1.2rem; cursor: pointer; line-height: 1; }
+  #agent-log { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+  .agent-msg { max-width: 85%; padding: 8px 12px; border-radius: 6px; font-size: 0.9rem; line-height: 1.5; white-space: pre-wrap; }
+  .agent-msg.bot { background: #f4f4f7; color: #1a1a2e; align-self: flex-start; border: 1px solid rgba(0,0,0,0.08); }
+  .agent-msg.user { background: #1a1a2e; color: #fff; align-self: flex-end; }
+  .agent-msg.label { font-size: 0.65rem; letter-spacing: 0.08em; text-transform: uppercase; opacity: 0.6; padding: 0; background: none; border: none; }
+  #agent-form { display: flex; border-top: 1px solid rgba(0,0,0,0.1); }
+  #agent-input { flex: 1; border: none; padding: 12px; font-size: 0.9rem; font-family: 'Times New Roman', Times, serif; outline: none; }
+  #agent-send { background: #1a1a2e; color: #fff; border: none; padding: 0 18px; cursor: pointer; font-family: 'Times New Roman', Times, serif; font-weight: 600; }
+  #agent-send:disabled { opacity: 0.5; cursor: default; }
+</style>
+<button id="agent-fab" aria-label="Open assistant">?</button>
+<div id="agent-panel" role="dialog" aria-label="Particleboard Agent">
+  <div id="agent-head"><span>Agent Assistant<br><span class="sub">Shell-based panels</span></span><button id="agent-close" aria-label="Close">&times;</button></div>
+  <div id="agent-log"></div>
+  <form id="agent-form">
+    <input id="agent-input" type="text" placeholder="Ask about TS, MOR, IB..." autocomplete="off" />
+    <button id="agent-send" type="submit">Send</button>
+  </form>
+</div>
+<script>
+(function(){
+  var API = 'https://shell-gemini.mirindiderick.workers.dev/';
+  var fab = document.getElementById('agent-fab');
+  var panel = document.getElementById('agent-panel');
+  var closeBtn = document.getElementById('agent-close');
+  var log = document.getElementById('agent-log');
+  var form = document.getElementById('agent-form');
+  var input = document.getElementById('agent-input');
+  var sendBtn = document.getElementById('agent-send');
+  var greeted = false;
+  function strip(t){ return String(t).replace(/\*\*/g, '').replace(/^\s*\*\s?/gm, '\u2022 '); }
+  function add(text, cls, label){
+    if(label){ var l=document.createElement('div'); l.className='agent-msg label'; l.textContent=label; log.appendChild(l); }
+    var d=document.createElement('div'); d.className='agent-msg '+cls; d.textContent=text; log.appendChild(d); log.scrollTop=log.scrollHeight;
+  }
+  function openPanel(){ panel.classList.add('open'); if(!greeted){ add('Hello. I can help you predict and understand shell-based particleboard properties. Ask a question or pick an example.', 'bot', 'Agent'); greeted=true; } input.focus(); }
+  fab.addEventListener('click', function(){ panel.classList.contains('open') ? panel.classList.remove('open') : openPanel(); });
+  closeBtn.addEventListener('click', function(){ panel.classList.remove('open'); });
+  form.addEventListener('submit', function(e){
+    e.preventDefault();
+    var msg = input.value.trim(); if(!msg) return;
+    add(msg, 'user', 'You'); input.value=''; sendBtn.disabled=true;
+    var thinking=document.createElement('div'); thinking.className='agent-msg bot'; thinking.textContent='Thinking...'; log.appendChild(thinking); log.scrollTop=log.scrollHeight;
+    fetch(API, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ message: msg }) })
+      .then(function(r){ return r.json(); })
+      .then(function(data){ thinking.remove(); add(strip(data.reply || 'No response.'), 'bot', 'Agent'); })
+      .catch(function(){ thinking.remove(); add('Sorry, something went wrong. Please try again.', 'bot', 'Agent'); })
+      .finally(function(){ sendBtn.disabled=false; input.focus(); });
+  });
+})();
+</script>
 </body>
 </html>
