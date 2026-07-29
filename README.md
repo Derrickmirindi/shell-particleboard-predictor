@@ -83,5 +83,5 @@ Potential future improvements include:
 ## License
 
 This repository may be extended with an appropriate open-source license depending on the intended academic, research, or public-use context.
-# Developed by Derrick Mirindi
+# Developed by Derrick Mirindi, David Sinkhonde and Frederic Mirindi
 
